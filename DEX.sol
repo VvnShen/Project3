@@ -69,7 +69,7 @@ library SafeMath {
     * initializer(wallet address);
     * price (rate to convert ETH/USDC)
     2) State.Locked mechenism to lock the init_amount in contract until order confirmed by the settler, then release it to settler.
-    3) initializer is the same as person to create the contract. This seems to be the only way to lock the amount.
+    3) this should work in python for FE: tx_hash = contract.functions.initializer().transact({'from': initializer's adreess, 'gas': 1000000})
 **/
 
 contract Dex_ETH_owner_trading {
