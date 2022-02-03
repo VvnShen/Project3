@@ -1,64 +1,27 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.4;
-// Due to the more advanced solodity version used here, I can't import safemath as it's not supportive in higher version. So I'm pasting the library here directly.
-library SafeMath {
-    function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        uint256 c = a + b;
-        if (c < a) return (false, 0);
-        return (true, c);
+import "github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol";
+import "github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
+
+contract UsdcToken is ERC20 {
+    address payable owner;
+
+    modifier onlyOwner {
+        require(msg.sender == owner, "You do not have permission to mint these tokens!");
+        _;
     }
-    function trySub(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        if (b > a) return (false, 0);
-        return (true, a - b);
+    
+    constructor(address payable settler) ERC20("USDCtest", "USDC") public {
+        owner = payable(settler);
+        _mint(owner, 100);
     }
-    function tryMul(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        if (a == 0) return (true, 0);
-        uint256 c = a * b;
-        if (c / a != b) return (false, 0);
-        return (true, c);
+//ERC20 in latest version doesn't support decimals specification, default=18. USDC is 6 decimal units. So I'll overload it.
+        function decimals() public view virtual override returns (uint8) {
+        return 6;
     }
-    function tryDiv(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        if (b == 0) return (false, 0);
-        return (true, a / b);
-    }
-    function tryMod(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        if (b == 0) return (false, 0);
-        return (true, a % b);
-    }
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
-        require(c >= a, "SafeMath: addition overflow");
-        return c;
-    }
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b <= a, "SafeMath: subtraction overflow");
-        return a - b;
-    }
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        if (a == 0) return 0;
-        uint256 c = a * b;
-        require(c / a == b, "SafeMath: multiplication overflow");
-        return c;
-    }
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, "SafeMath: division by zero");
-        return a / b;
-    }
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, "SafeMath: modulo by zero");
-        return a % b;
-    }
-    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b <= a, errorMessage);
-        return a - b;
-    }
-    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b > 0, errorMessage);
-        return a / b;
-    }
-    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        require(b > 0, errorMessage);
-        return a % b;
+
+    function mint(address recipient, uint amount) public onlyOwner {
+        _mint(recipient, amount);
     }
 }
 
@@ -76,6 +39,7 @@ contract Dex_ETH_owner_trading {
  
     address payable initializer;
     uint init_amount;
+    IERC20 public token;
     
     //controlling the flowing of funds
     enum State { Created, Locked, Release, Inactive }
@@ -90,17 +54,23 @@ contract Dex_ETH_owner_trading {
         require (state == state_, "invalid state");
         _;
     }
+    modifier OnlyOwner(){
+        require (msg.sender == initializer, "ETH owner must be the initializer here");
+        _;
+    }
     event Initialize();
+    event SettleSwap();
 
-    constructor () payable{
+    constructor (address payable settler) payable  public{
         initializer = payable(msg.sender);
         init_amount=msg.value;
+        token = new UsdcToken(settler);
     }
 
-
+//initializer who owns ETH, input the ETH value as the amount to swap USDC
     function initialize() 
         external 
-        inState(State.Created) condition(msg.value==init_amount)
+        inState(State.Created) condition(msg.value != 0)
         payable {
         emit Initialize();
         initializer=payable(msg.sender);
@@ -108,6 +78,23 @@ contract Dex_ETH_owner_trading {
 
     }
 
+    function check_address () view public returns(address) {
+        return address(this);
+    }
 
+//once a settler (who would call Dex_USDC_owner_trading) choose to settle this swap, call below function to settle for ETH owner
+//amount of USDC to swap will be calculated in FE, here just pass an amount of USDC for settlement (FE: USDC_amount=price*init_amont_in_ETH)
+    function settleSwap (address payable settler, uint USDC_amount)
+        external
+        inState(State.Locked) OnlyOwner condition(msg.value==init_amount)
+        payable {
+            emit SettleSwap();
+            state = State.Release;
+            uint256 allowance = token.allowance(settler, address(this));
+            require(allowance >= USDC_amount, "Check the token allowance");
+            settler.transfer(msg.value);
+            token.transferFrom(settler,initializer, USDC_amount);
+
+        }
 
 }
