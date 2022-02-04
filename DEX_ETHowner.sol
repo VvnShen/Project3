@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.4;
 import "github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
+import 'USDC_testnet.sol';
 
 
  /** Dex_ETH_owner_trading: initializer owns ETH, and want to swap with USDC. 
@@ -17,7 +18,7 @@ contract Dex_ETH_owner_trading {
  
     address payable initializer;
     uint init_amount;
-    IERC20 public token;
+    IUsdcToken public token;
     
     //controlling the flowing of funds
     enum State { Created, Locked, Release, Inactive }
@@ -51,7 +52,7 @@ contract Dex_ETH_owner_trading {
 //this contract will be initialized bt whom owns Ether and wants to swap to UDDC
     function initialize() 
         external 
-        inState(State.Created) condition(init_amount == msg.value)
+        inState(State.Created) condition(msg.value !=0)
         payable {
         emit Initialize();
         initializer=payable(msg.sender);
@@ -70,15 +71,16 @@ contract Dex_ETH_owner_trading {
         payable {
             emit SettleSwap();
             state = State.Release;
-            token = IERC20(_token);
+            token = IUsdcToken(_token);
             require (token.allowance(settler,address(this)) >= USDC_amount,"please make sure settler approve the token's delegation");
             settler.transfer(init_amount);
             _safeTransferFrom(token,settler,initializer, USDC_amount);
+            
 
         }
 
     function _safeTransferFrom(
-        IERC20 _token,
+        IUsdcToken _token,
         address sender,
         address recipient,
         uint amount) private {
