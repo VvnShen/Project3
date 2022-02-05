@@ -4,16 +4,7 @@ import "github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/tok
 import 'USDC_testnet.sol';
 
 
- /** Dex_ETH_owner_trading: initializer owns ETH, and want to swap with USDC. 
-    1) required fileds to be input by initializer (Gather in front end): 
-    * init_symbol(owns Ether/USDC); 
-    * init_amount(how many Eth/USDC want to swap with the other);
-    * initializer(wallet address);
-    * price (rate to convert ETH/USDC)
-    2) State.Locked mechenism to lock the init_amount in contract until order confirmed by the settler, then release it to settler.
-    3) this should work in python for FE: tx_hash = contract.functions.initializer().transact({'from': initializer's adreess, 'gas': 1000000})
-**/
-
+ //Dex_ETH_owner_trading: initializer owns ETH, and want to swap with USDC. 
 contract Dex_ETH_owner_trading {
  
     address payable initializer;
@@ -65,26 +56,27 @@ contract Dex_ETH_owner_trading {
 
 
 
-    function settleSwap (address payable settler,address _token, uint USDC_amount)
+    function settleSwap (address payable settler,address payable _token, uint USDC_amount)
         external
-        inState(State.Locked) OnlyOwner condition(init_amount != 0)  
+        inState(State.Locked) OnlyOwner condition(msg.value != 0)  
         payable {
             emit SettleSwap();
             state = State.Release;
             token = IUsdcToken(_token);
-            require (token.allowance(settler,address(this)) >= USDC_amount,"please make sure settler approve the token's delegation");
-            settler.transfer(init_amount);
+            settler.transfer(msg.value);
+            initializer.transfer(msg.value);
             _safeTransferFrom(token,settler,initializer, USDC_amount);
-            
-
         }
 
     function _safeTransferFrom(
         IUsdcToken _token,
         address sender,
         address recipient,
-        uint amount) private {
+        uint amount) private  {
             bool sent = _token.transferFrom(sender, recipient, amount);
             require(sent, "Token transfer failed");
     }
+
+
+  
 }
