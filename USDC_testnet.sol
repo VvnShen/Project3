@@ -17,8 +17,10 @@ interface IUsdcToken {
 
 contract UsdcToken is ERC20 {
     address payable owner;
-    bool public transferable = false;
-    mapping(address => mapping(address => uint256)) private _allowances;
+    bool public transferable = true;
+    //mapping(address => mapping(address => uint256)) private _allowances;
+
+    //event Transfer_(address sender, address grantor,uint amountofallowance);
 
     modifier onlyOwner {
         require(msg.sender == owner, "You do not have permission to mint these tokens!");
@@ -26,7 +28,7 @@ contract UsdcToken is ERC20 {
     }
 
     modifier istransferable {
-        require(transferable==false, "token under lock, can Not Trade");
+        require(transferable==true, "token under lock, can Not Trade");
          _;
     }
     
@@ -51,13 +53,7 @@ contract UsdcToken is ERC20 {
     }
 
     function transferFrom(address sender, address recipient, uint256 amount) public istransferable virtual override returns (bool) {
-        uint256 currentAllowance = _allowances[sender][_msgSender()];
-        if (currentAllowance != type(uint256).max) {
-            require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
-            unchecked {
-                _approve(sender, _msgSender(), currentAllowance - amount);
-            }
-        }
+        require(allowance(sender,msg.sender) >= amount, "ERC20: Allowance not high enough.");
         _transfer(sender, recipient, amount);
         return true;
     }
@@ -65,6 +61,7 @@ contract UsdcToken is ERC20 {
     function isTransferable(bool _choice) public {
         transferable = _choice;
     }
+
+
     
 }
-
