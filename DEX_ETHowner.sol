@@ -12,7 +12,7 @@ contract Dex_ETH_owner_trading {
     IUsdcToken public token;
     
     //controlling the flowing of funds
-    enum State { Created, Locked, Release, Inactive }
+    enum State { Created, Locked, Release, Cancelled }
     State public state;
 
     modifier condition(bool condition_){
@@ -67,6 +67,12 @@ contract Dex_ETH_owner_trading {
             initializer.transfer(msg.value);
             _safeTransferFrom(token,settler,initializer, USDC_amount);
         }
+//this function is to withdraw the swap for initizlier before settleswap is completed. partially withdrawal is not supportive
+    function withdrawSwap (address _token) external payable inState(State.Locked) OnlyOwner {
+        token = IUsdcToken(_token);
+        initializer.transfer(msg.value);
+        state = State.Cancelled;
+    }
 
     function _safeTransferFrom(
         IUsdcToken _token,
