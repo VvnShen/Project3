@@ -68,8 +68,7 @@ contract Dex_ETH_owner_trading {
             _safeTransferFrom(token,settler,initializer, USDC_amount);
         }
 //this function is to withdraw the swap for initizlier before settleswap is completed. partially withdrawal is not supportive
-    function withdrawSwap (address _token) external payable inState(State.Locked) OnlyOwner {
-        token = IUsdcToken(_token);
+    function withdrawSwap () external payable inState(State.Locked) OnlyOwner {
         initializer.transfer(msg.value);
         state = State.Cancelled;
     }
