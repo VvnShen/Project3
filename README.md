@@ -5,7 +5,7 @@ Please get ready remix with solidity codes attached in the github, as well as Ga
 
 ### Session 1. contract Dex_ETH_owner_trading
 This contract is for initializer who owns ETH and wants to swap to USDC.
-1) import two accounts from Garache into Metamask Granache test network.
+1) import two accounts from Garache into Metamask Granache test network. compile DEX_ETHowner.sol.
 <img width="695" alt="image" src="https://user-images.githubusercontent.com/88476898/152664149-a2962b21-6b90-45a9-8e25-e4c8dd80c49c.png">
 
 2) load UsdcToken under 'Account 2'.
@@ -23,7 +23,7 @@ Dex_ETH_owner_trading contract token: 0x7B7B4DD8fB7ACbd69264973B1C97970075f8DB2B
 4) initialize the swap
 please put a number in Value field. This number is the Ether amount initializer want to swap to USDC, i.e. here init_amount = 10 Ether.
 ![image](https://user-images.githubusercontent.com/88476898/152664258-a0962d85-8a1f-4313-98cb-3c3dbb8f10dd.png)
-Note 10 Ether is depositing into the Dex_ETH_owner_trading contract, and get locked until a settler come to settle the swap. The state=1 below means locked.
+Note: 10 Ether is depositing into the Dex_ETH_owner_trading contract, and get locked until a settler come to settle the swap. The state=1 below means locked.
 ![image](https://user-images.githubusercontent.com/88476898/152664283-b5f17040-1df7-4a05-bfb2-b0aeb7804eb4.png)
 
 5) ok time to settle the swap. 
@@ -52,6 +52,51 @@ click withdraw button.
 ![image](https://user-images.githubusercontent.com/88476898/152664648-6a8e5ee9-160f-49f7-b684-48591658b441.png)
 What it does is to return back the Eth amount deposited in the contract and change the status to canceled (State=3).
 ![image](https://user-images.githubusercontent.com/88476898/152664669-1184b764-f4b3-43e4-bb08-3807d10451e2.png)
+
+
+### Session 2. contract Dex_USDC_owner_trading
+1) import two new accounts so the initial Ether balance is 100, which is easy to track. compile DEX_USDCowner.sol.
+<img width="839" alt="image" src="https://user-images.githubusercontent.com/88476898/152664745-6e4b4533-fdee-410b-8eb2-da23a1c2543b.png">
+
+2) use account 2 to create USDC token. This time, account 2 is initalizer. 
+Iitializer: 0xff98a73308Aa585c76595d356334f0a856bB61A0
+USDC toke: 0xff98a73308Aa585c76595d356334f0a856bB61A0
+![image](https://user-images.githubusercontent.com/88476898/152664812-cb79e844-5826-41a5-84fe-3904916bf1dd.png)
+
+3) Use same account 2 to create Dex_USDC_owner_trading contract. 
+contract token: 0xb3C45E30a03c503eE03a3665792FCC9e228eE93E
+
+4) initializer(account 2) approve the allowances
+Spender: 0xb3C45E30a03c503eE03a3665792FCC9e228eE93E
+amount: let's set 10000000000
+![image](https://user-images.githubusercontent.com/88476898/152664875-c04d58f8-5789-468f-bf7c-1d19a0f1eede.png)
+
+5) initializer to initialize the contract.
+![image](https://user-images.githubusercontent.com/88476898/152664915-dc9496ff-102e-48eb-b025-e24815628459.png)
+all it does is to mark transferable as false, so to lock the USDC token. and state has been changed to locked (state=1).
+
+6) Settler (account 3) to settle the swap. 
+Change to account 3 first of all. Then input value filed: let's say, 10 Ether (Settlement amount). Fill in below details under settleSwap.
+init_amount: 10000000000
+settler: "0x36d0eA47C289D526136E70e95565EE03Ab81F463"
+_token: "0x23A5ff66e0A2Da88c4d7Ac139CEAe917D3ee2C59"
+
+7) Transaction is completed. Let's review the balances. 
+Account 2: Intializer who owns USDC.
+![image](https://user-images.githubusercontent.com/88476898/152665040-bcd04a97-080e-4124-b826-fb77f9d322d3.png)
+Account 3: settler who want to gain USDC. 
+![image](https://user-images.githubusercontent.com/88476898/152665061-b13b23b2-bbf5-49c2-bfbe-5a08b8a03582.png)
+
+8) Again if initializer want to withdraw before settlement, I have a withdraw button designed for it.
+repeat step 2, 3, 4, 5. 
+then input USDC token and click withdraw. What it does is to make transferable true so that USDC token can be traded in other contracts.
+![image](https://user-images.githubusercontent.com/88476898/152665113-7602b0a5-fb6a-413c-97d8-e98f07a889de.png)
+
+
+Enjoy the playing around and welcome for suggestions :)
+
+
+
 
 
 
