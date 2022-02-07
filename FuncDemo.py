@@ -68,12 +68,15 @@ st.title('Welcome To Operation One-Way-St')
 st.write("Initialize Swapping using ETH to buy USDC")
 initialize_address = st.selectbox("Transaction Wallet Address", options=accounts)
 st.write(f'Token Address is {usdc_token_address}, and initialize_address is {initialize_address}')
-#amount = 100
+amt = int(st.number_input("Amount to be transfer (in Wei)"))
 if st.button("Initialize"):
     tx_hash = eth_contract.functions.initialize().transact({'value': 10000000000000000000, 'from': initialize_address, 'gas': 1000000})
     receipt = w3.eth.waitForTransactionReceipt(tx_hash)
     st.write("Transaction receipt mined:")
     st.write(dict(receipt))
+
+st.write('Here we settle the contract')
+
 
 #initialize_address = accounts[1]
 #st.write(f'Token Address is {usdc_token_address}, and initialize_address is {initialize_address}')

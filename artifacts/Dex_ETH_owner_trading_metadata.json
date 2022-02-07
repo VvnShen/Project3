@@ -114,11 +114,11 @@
 	},
 	"sources": {
 		"DEX_ETHowner.sol": {
-			"keccak256": "0xb4087aa2b8f0846ac2ef11432eed9eeac9418040eef347e48dc2dd023d5ec3de",
+			"keccak256": "0x7242f213fec29074ed9c1e1c5218107a122ba7025ef4f3bda226f0182055c895",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://112472b6ba666f202dd794eb21f4a9b09cd0065a2e7cc74787e1aa0f8fc25f58",
-				"dweb:/ipfs/QmWxjL1MgJMr3CR7B1HkPu1wPAjpnrMSTMVsa7tZ5i3HEt"
+				"bzz-raw://a2cab03bc643546e71130dccf10202356e7929d30fbcda77695715549afc5211",
+				"dweb:/ipfs/Qmak3NnEJ31eUh5S3Y8K39EDG8vPJWcsveYQ9bdd2ZT77q"
 			]
 		},
 		"USDC_testnet.sol": {

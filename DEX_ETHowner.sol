@@ -43,7 +43,8 @@ contract Dex_ETH_owner_trading {
 //this contract will be initialized bt whom owns Ether and wants to swap to UDDC
     function initialize() 
         external 
-        inState(State.Created) condition(msg.value !=0)
+        //inState(State.Created) 
+        condition(msg.value !=0)
         payable {
         emit Initialize();
         initializer=payable(msg.sender);
