@@ -56,6 +56,23 @@ def load_usdc_contract():
 
     return usdc_contract
 
+def load_contract(json_file_path, address_name):
+
+    # Load the contract ABI
+    with open(Path(json_file_path)) as f:
+        abi = json.load(f)
+
+    # Set the contract address (this is the address of the deployed contract)
+    address = os.getenv(address_name)
+
+    # Get the contract
+    contract = w3.eth.contract(
+        address=address,
+        abi=abi
+    )
+
+    return contract
+
 # Functions for crypto exchange transactions
 def transact_offer(selected_offer):
 
@@ -77,6 +94,8 @@ def transact_offer(selected_offer):
 def add_offer(trade_type, exchange_rate, amount, offer_address):
     # Call the contract to create a token of this offer
     if trade_type is 'Buy':   # user wants to buy ETH
+        #tx_hash = usdc_token_contract.functions.approve(offer_address, amount)
+        #receipt = w3.eth.waitForTransactionReceipt(tx_hash)
         tx_hash = usdc_contract.functions.initialize(int(amount), usdc_token_address).transact({'from': offer_address, 'gas': 1000000})
         receipt = w3.eth.waitForTransactionReceipt(tx_hash)
     else:                     # user own ETH and wants to sell
@@ -112,8 +131,11 @@ def display_offers(offers):
 # load both contracts
 eth_contract = load_eth_contract()
 usdc_contract = load_usdc_contract()
+usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', 'USDC_TOKEN_CONTRACT_ADDRESS')
 # Set USDC Token Address
 usdc_token_address = os.getenv("USDC_TOKEN_CONTRACT_ADDRESS")
+eth_contract_address = os.getenv("ETH_OWNER_CONTRACT_ADDRESS")
+usdc_contract_address = os.getenv("USDC_OWNER_CONTRACT_ADDRESS")
 
 # initialize current offer structure
 if 'offers' not in st.session_state:

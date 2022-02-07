@@ -144,11 +144,11 @@
 	},
 	"sources": {
 		"DEC_USDCowner.sol": {
-			"keccak256": "0x7897e8085ae6a88ea506d0298da60c2dfe11111662c63921626a35fb0625f062",
+			"keccak256": "0x7b7d7ffdb529799eaf691ec6646ec3b611d5bab44b0a7ddfbe5c92919e806bd2",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://3d462ab9606bbb50bf6e590662d4d5e12f90271ee8ced3ddb3aea78d1b9afac0",
-				"dweb:/ipfs/Qmb12uRt6BTqsoT7q3gWq64Eez8tTyhdRhwf8SrWWUkMNh"
+				"bzz-raw://ab65516755b408db15116a1689532d2f9103180bece5a784284737c257ce78bc",
+				"dweb:/ipfs/QmRaeqkCo7N48YTMgBDCrHYQJpVARczevxD4sHB2ZHhLEQ"
 			]
 		},
 		"USDC_testnet.sol": {

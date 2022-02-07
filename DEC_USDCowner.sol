@@ -30,7 +30,7 @@ contract Dex_USDC_owner_trading {
          _;
     }
     modifier inState(State state_){
-        require (state == state_, "invalid state");
+        require (state == state_, "State is not created");
         _;
     }
 
@@ -45,7 +45,8 @@ contract Dex_USDC_owner_trading {
 
 //this contract will be initialized by whom owns USDC and wants to swap to Ether
     function initialize(uint init_amount, address _token)
-        inState(State.Created) onlyInitializer external  payable {
+        //inState(State.Created) 
+        onlyInitializer external  payable {
         emit Initialize();
         token = IUsdcToken(_token);
         require (token.allowance(initializer,address(this)) >= init_amount,"please approve the token's delegation to this contract address ") ;
@@ -56,11 +57,11 @@ contract Dex_USDC_owner_trading {
 
 //amount of Ether to swap will be calculated in FE, here just pass an amount of Ether for settlement (FE: USDC_amount=price*init_amont_in_ETH*1000000)
     function settleSwap (uint init_amount, address payable settler_,address _token)
-        external 
-        inState(State.Locked) 
-        condition(init_amount != 0)  
-        condition(msg.value !=0)
-        payable {
+        external       
+        inState(State.Locked)
+        //condition(init_amount != 0)  
+        //condition(msg.value !=0)
+        payable  condition(init_amount != 0)   {
             emit SettleSwap();
             token = IUsdcToken(_token);
             settler=settler_;
@@ -70,6 +71,7 @@ contract Dex_USDC_owner_trading {
             state = State.Release;
             _safeTransferFrom(token, initializer,settler,init_amount);
             initializer.transfer(msg.value);
+            // state = State.Created
         }
 //this function is to withdraw the swap for initizlier before settleswap is completed. partially withdrawal is not supportive
     function withdrawSwap (address _token) external inState(State.Locked) onlyInitializer {
