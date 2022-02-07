@@ -44,7 +44,7 @@ contract Dex_USDC_owner_trading {
     
 
 //this contract will be initialized by whom owns USDC and wants to swap to Ether
-    function initialize(uint init_amount,address _token) 
+    function initialize(uint init_amount, address _token)
         inState(State.Created) onlyInitializer external  payable {
         emit Initialize();
         token = IUsdcToken(_token);
@@ -53,7 +53,6 @@ contract Dex_USDC_owner_trading {
         state = State.Locked;
 
     }
-
 
 //amount of Ether to swap will be calculated in FE, here just pass an amount of Ether for settlement (FE: USDC_amount=price*init_amont_in_ETH*1000000)
     function settleSwap (uint init_amount, address payable settler_,address _token)

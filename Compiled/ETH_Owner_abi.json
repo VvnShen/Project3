@@ -31,7 +31,7 @@
 				"type": "address"
 			},
 			{
-				"internalType": "address",
+				"internalType": "address payable",
 				"name": "_token",
 				"type": "address"
 			},
@@ -70,6 +70,13 @@
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "withdrawSwap",
+		"outputs": [],
+		"stateMutability": "payable",
 		"type": "function"
 	}
 ]
