@@ -50,8 +50,8 @@ w3 = Web3(Web3.HTTPProvider(os.getenv("WEB3_PROVIDER_URI")))
 
 # Set USDC Token Address
 #usdc_token_address = os.getenv("USDC_TOKEN_CONTRACT_ADDRESS")
-usdc_token_address = '0xa8B6E76f7817Ad2262245F1B998318E11595604D'
-eth_contract_address = '0x47fd5A933e0B442783e207AB316265cdF65acdba'
+usdc_token_address = '0xf15435d605102DaFa34879b484767df1bFea0694'
+eth_contract_address = '0xf868E1873a179723442eCFb42E835C0bE1792b3B'
 usdc_contract_address = '0x67E9462ba96640908Ad95A5a947e0E974AB4F224'
 
 # load both contracts
@@ -59,25 +59,38 @@ eth_contract = load_contract('./Compiled/ETH_Owner_abi.json', eth_contract_addre
 usdc_contract = load_contract('./Compiled/USDC_Owner_abi.json', usdc_contract_address)
 usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', usdc_token_address)
 
+eth_to_wei = 1000000000000000000
+total_USDC_token = 10000000000
+# Approve USDC limits
+#tx_hash = usdc_token_contract.functions.approve('eth_contract_address', 5000000).transact({'gas': 1000000})
+#receipt = w3.eth.waitForTransactionReceipt(tx_hash)
 
+
+#st.write('Allowance Approved')
 # Get accounts addresses from Ganache
 accounts = w3.eth.accounts
 
 st.title('Welcome To Operation One-Way-St')
 #st.write("First we initialize swap by ETH Owner in exchange of USDC")
 st.write("Initialize Swapping using ETH to buy USDC")
-initialize_address = st.selectbox("Transaction Wallet Address", options=accounts)
+initialize_address = st.selectbox("ETH Initializer Wallet Address", options=accounts)
 st.write(f'Token Address is {usdc_token_address}, and initialize_address is {initialize_address}')
-amt = int(st.number_input("Amount to be transfer (in Wei)"))
+amt = int(st.number_input("Amount to be transfer (ETH)"))
 if st.button("Initialize"):
-    tx_hash = eth_contract.functions.initialize().transact({'value': 10000000000000000000, 'from': initialize_address, 'gas': 1000000})
+    tx_hash = eth_contract.functions.initialize().transact({'value': amt*eth_to_wei, 'from': initialize_address, 'gas': 1000000})
     receipt = w3.eth.waitForTransactionReceipt(tx_hash)
     st.write("Transaction receipt mined:")
     st.write(dict(receipt))
 
 st.write('Here we settle the contract')
-
-
+settler_address = st.selectbox("ETH Settler Wallet Address", options=accounts)
+price = st.number_input('Price of ETH in USDC')
+usdc_amount = int(price*amt*1000000)
+if st.button("Settle"):
+    tx_hash = eth_contract.functions.settleSwap(settler_address, usdc_token_address, usdc_amount).transact({'value': amt, 'from': initialize_address, 'gas': 1000000})
+    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+    st.write("Transaction receipt mined:")
+    st.write(dict(receipt))
 #initialize_address = accounts[1]
 #st.write(f'Token Address is {usdc_token_address}, and initialize_address is {initialize_address}')
 #st.write("First we initialize swap by ETH Owner in exchange of USDC")
