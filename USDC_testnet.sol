@@ -31,7 +31,7 @@ contract UsdcToken is ERC20 {
     constructor() ERC20("USDCtest", "USDC")  {
         owner = payable(msg.sender);
         //default initial supply of the token is 10000USDC (6 decimals)
-        _mint(owner, 1000000000000000000);
+        _mint(owner, 100000*100000);
 
     }
 //ERC20 in latest version doesn't support decimals specification, default=18. USDC is 6 decimal units. So I'll overload it.

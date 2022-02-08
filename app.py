@@ -22,89 +22,99 @@ w3 = Web3(Web3.HTTPProvider(os.getenv("WEB3_PROVIDER_URI")))
 
 
 @st.cache(allow_output_mutation=True)
-def load_eth_contract():
-
-    with open(Path('./Compiled/ETH_Owner_abi.json')) as f:
-        eth_abi = json.load(f)
-
-
-    # Set the contract address (this is the address of the deployed contract)
-    eth_contract_address = os.getenv("ETH_OWNER_CONTRACT_ADDRESS")
-
-    # Get the contract
-    eth_contract = w3.eth.contract(
-        address=eth_contract_address,
-        abi=eth_abi
-    )
-
-    return eth_contract
-
-def load_usdc_contract():
-
-    # Load the contract ABI
-    with open(Path('./Compiled/USDC_Owner_abi.json')) as f:
-        usdc_abi = json.load(f)
-
-    # Set the contract address (this is the address of the deployed contract)
-    usdc_contract_address = os.getenv("USDC_OWNER_CONTRACT_ADDRESS")
-
-    # Get the contract
-    usdc_contract = w3.eth.contract(
-        address=usdc_contract_address,
-        abi=usdc_abi
-    )
-
-    return usdc_contract
-
-def load_contract(json_file_path, address_name):
+def load_contract(json_file_path, contract_address):
 
     # Load the contract ABI
     with open(Path(json_file_path)) as f:
         abi = json.load(f)
 
     # Set the contract address (this is the address of the deployed contract)
-    address = os.getenv(address_name)
+    #address = os.getenv(address_name)
 
     # Get the contract
     contract = w3.eth.contract(
-        address=address,
+        address=contract_address,
         abi=abi
     )
 
     return contract
 
 # Functions for crypto exchange transactions
-def transact_offer(selected_offer):
+def transact_offer(selected_offer, settler_address, usdc_token_address):
 
     # Determine which offer is selected
     delim_str = selected_offer.split(';')
     id = int(delim_str[-1].split(':')[-1])
     off = st.session_state.offers
     for i, row in off.iterrows():
-        #x = 1
+        # Check if the Trade ID match the id given
         if row.TradeID == id:
-            x = i
+            trade_type = row['Trade']
+            price = int(row['Rate'])
+            amount = int(row['Amount'])
+            initialize_address = row['address']
             updated_offers = off.drop([i])
+            
     
     # Call contract to execute transaction functions
+    if trade_type is 'Buy':   # Selected offer is to settle ETH with USDC
+        usdc_amount = amount
+        eth_amount = int(eth_to_wei*(usdc_amount/price))
+        #st.write(f'Initializer Address = {initialize_address}')
+        #st.write(f'Settler Address = {settler_address}')
+        tx_hash = usdc_contract.functions.settleSwap(usdc_amount*usdc_to_viv, settler_address, usdc_token_address).transact({'value': eth_amount, 'from': settler_address, 'gas': 1000000})
+        receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+        st.write("Transaction receipt mined:")
+        st.write(dict(receipt))
+    else:
+        
+        # load usdc token contract
+        usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', usdc_token_address)
+        eth_amount = amount
+        usdc_amount = int(price*eth_amount*usdc_to_viv)
+        # First approve the amount to be transacted
+        tx_hash = usdc_token_contract.functions.approve(eth_contract_address, usdc_amount).transact({'from':settler_address,'gas': 1000000})
+        receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+        st.write(dict(receipt))
+
+        tx_hash = eth_contract.functions.settleSwap(settler_address, usdc_token_address, usdc_amount).transact({'value': eth_amount, 'from': initialize_address, 'gas': 1000000})
+        receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+        st.write("Transaction receipt mined:")
+        st.write(dict(receipt))
+
 
     # Remove transacted offer from the list
     st.session_state.offers = updated_offers
 
-def add_offer(trade_type, exchange_rate, amount, offer_address):
+def add_offer(trade_type, exchange_rate, amount, offer_address, usdc_token_address=None):
     # Call the contract to create a token of this offer
     if trade_type is 'Buy':   # user wants to buy ETH
-        #tx_hash = usdc_token_contract.functions.approve(offer_address, amount)
-        #receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-        tx_hash = usdc_contract.functions.initialize(int(amount), usdc_token_address).transact({'from': offer_address, 'gas': 1000000})
+        usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', usdc_token_address)
+        usdc_amount = amount
+
+        # First approve the transcation from the token contract
+        tx_hash = usdc_token_contract.functions.approve(usdc_contract_address, usdc_amount*usdc_to_viv).transact({'from':offer_address,'gas': 1000000})
         receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+        st.write(dict(receipt))
+
+        # Initialize the offer
+        tx_hash = usdc_contract.functions.initialize(usdc_amount*usdc_to_viv, usdc_token_address).transact({'from': offer_address, 'gas': 1000000})
+        receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+        st.write("Transaction receipt mined:")
+        st.write(dict(receipt))
+
     else:                     # user own ETH and wants to sell
-        tx_hash = eth_contract.functions.initialize().transact({'from': offer_address, 'gas': 1000000})
+        initialize_amount = amount*eth_to_wei
+        tx_hash = eth_contract.functions.initialize().transact({'value': initialize_amount, 'from': offer_address, 'gas': 1000000})
         receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+        st.write("Transaction receipt mined:")
+        st.write(dict(receipt))
+
     if st.session_state.offers.empty:
         id = 0
     else:
         id = st.session_state.offers['TradeID'].max()+1
+
     # add the offer to the display list
     st.session_state.offers = st.session_state['offers'].append({'TradeID': id, 'Trade': trade_type, 'Rate': exchange_rate, 'Amount': amount, 'address': offer_address}, ignore_index=True)
 
@@ -129,13 +139,22 @@ def display_offers(offers):
 ################################################
 
 # load both contracts
-eth_contract = load_eth_contract()
-usdc_contract = load_usdc_contract()
-usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', 'USDC_TOKEN_CONTRACT_ADDRESS')
-# Set USDC Token Address
-usdc_token_address = os.getenv("USDC_TOKEN_CONTRACT_ADDRESS")
-eth_contract_address = os.getenv("ETH_OWNER_CONTRACT_ADDRESS")
-usdc_contract_address = os.getenv("USDC_OWNER_CONTRACT_ADDRESS")
+
+# Set Contract Address
+eth_contract_address = '0x889542459b28e8c341ca13bD702B749cf048AFf8'
+usdc_contract_address = '0xA729d1849260Cd0E886414643d83B3E86AB8040F'
+#usdc_token_address = '0x7be2101967324E87A142D6D2672c3ce1A2ff720C'
+
+# load both contracts
+eth_contract = load_contract('./Compiled/ETH_Owner_abi.json', eth_contract_address)
+usdc_contract = load_contract('./Compiled/USDC_Owner_abi.json', usdc_contract_address)
+#usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', usdc_token_address)
+
+# Some hard facts
+eth_to_wei = 1000000000000000000
+usdc_to_viv = 1000000
+total_USDC_token = 1000000000000000000
+
 
 # initialize current offer structure
 if 'offers' not in st.session_state:
@@ -170,8 +189,9 @@ selected_offer = st.selectbox(
 if st.session_state.offers.empty == False:
     # Ask user for the transaction address
     your_address = st.selectbox("Select Transaction Account", options=accounts)
+    usdc_token_address='0x7be2101967324E87A142D6D2672c3ce1A2ff720C' #st.text_input("Your USDC Token address")
     # A button to make transaction of selected offer
-    st.button("Transact", on_click=transact_offer, args=[selected_offer])
+    st.button("Transact", on_click=transact_offer, args=[selected_offer, your_address, usdc_token_address])
 
 # Here we code our withdrawn button
 
@@ -179,9 +199,15 @@ if st.session_state.offers.empty == False:
 #Here we can invite user to make his/her own offer
 st.markdown("### Please make your offer here.")
 trade_type = st.selectbox('Buy or Sell?', ('Buy','Sell'))
-#offer_address = st.text_input("Transaction wallet address")
+
 offer_address = st.selectbox("Transaction Wallet Address", options=accounts)
-exchange_rate = st.text_input("Your exchange rate")
-amount = st.text_input("Amount to be exchanged")
-st.button("Make Offer", on_click=add_offer, args=[trade_type, exchange_rate, amount, offer_address])
+exchange_rate = st.text_input("Your exchange rate in USDC/ETH")
+if trade_type == 'Buy':
+    usdc_token_address = '0x7be2101967324E87A142D6D2672c3ce1A2ff720C' #st.text_input("Your USDC Token address")
+    amount = int(st.number_input("Amount to be exchanged (USDC)"))
+    st.button("Make Offer", on_click=add_offer, args=[trade_type, exchange_rate, amount, offer_address, usdc_token_address])
+else:
+    amount = int(st.number_input("Amount to be exchanged (ETH)"))
+    st.button("Make Offer", on_click=add_offer, args=[trade_type, exchange_rate, amount, offer_address]) #, usdc_token_address])
+
 

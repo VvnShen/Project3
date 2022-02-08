@@ -387,11 +387,11 @@
 	},
 	"sources": {
 		"USDC_testnet.sol": {
-			"keccak256": "0xe250abfed04c2fa0a2b5e214f967bae34527284fe7a70111966d10e3bee3801d",
+			"keccak256": "0xf20dae0ce751597fc7f8ac1d52411538a82a9bebd420eee6cfdbcbcc2df7810b",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://eeed4246d1f880d733893f07408e525537842cd4865fd02ad9795b2ec76bc337",
-				"dweb:/ipfs/QmS6adW7UWTdmtv4C6P5QX9S2UtXUWKQLSCgEKd2uB8RKF"
+				"bzz-raw://e2d152f36ee73c31b5243f722495da44f6f931fc9a1731e8b10b465dad50b0c2",
+				"dweb:/ipfs/QmanGe43MDKd8G5gGL4pKVQY95w64VeTM6ac4mX3J3NrjY"
 			]
 		},
 		"github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol": {
