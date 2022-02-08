@@ -49,12 +49,12 @@ w3 = Web3(Web3.HTTPProvider(os.getenv("WEB3_PROVIDER_URI")))
 # Set USDC Token Address
 usdc_token_address = '0x7be2101967324E87A142D6D2672c3ce1A2ff720C'
 eth_contract_address = '0xA729d1849260Cd0E886414643d83B3E86AB8040F'
-usdc_contract_address = '0xA729d1849260Cd0E886414643d83B3E86AB8040F'
+#usdc_contract_address = '0xA729d1849260Cd0E886414643d83B3E86AB8040F'
 
 # load both contracts
 eth_contract = load_contract('./Compiled/ETH_Owner_abi.json', eth_contract_address)
 usdc_contract = load_contract('./Compiled/USDC_Owner_abi.json', usdc_contract_address)
-usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', usdc_token_address)
+#usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', usdc_token_address)
 
 eth_to_wei = 1000000000000000000
 usdc_to_viv = 1000000
