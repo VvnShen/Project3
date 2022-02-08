@@ -11,17 +11,13 @@ interface IUsdcToken {
         uint256 amount
     ) external returns (bool);
     function allowance(address owner, address spender) external view returns (uint256);
+    function approve(address spender, uint256 amount) external  returns (bool);
 }
-
 
 
 contract UsdcToken is ERC20 {
     address payable owner;
     bool public transferable = true;
-    //mapping(address => mapping(address => uint256)) private _allowances;
-
-    //event Transfer_(address sender, address grantor,uint amountofallowance);
-
     modifier onlyOwner {
         require(msg.sender == owner, "You do not have permission to mint these tokens!");
         _;
@@ -35,7 +31,7 @@ contract UsdcToken is ERC20 {
     constructor() ERC20("USDCtest", "USDC")  {
         owner = payable(msg.sender);
         //default initial supply of the token is 10000USDC (6 decimals)
-        _mint(owner, 10000000000);
+        _mint(owner, 1000000000000000000);
 
     }
 //ERC20 in latest version doesn't support decimals specification, default=18. USDC is 6 decimal units. So I'll overload it.
@@ -60,6 +56,11 @@ contract UsdcToken is ERC20 {
 
     function isTransferable(bool _choice) public {
         transferable = _choice;
+    }
+    function approve(address spender, uint256 amount) public virtual override returns (bool) {
+        owner = payable(msg.sender);
+        _approve(owner, spender, amount);
+        return true;
     }
 
 
