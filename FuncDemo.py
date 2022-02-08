@@ -84,7 +84,17 @@ if st.button("Initialize ETH-USDC Swap"):
 
 st.write('Here we settle the contract')
 settler_address = st.selectbox("ETH Settler Wallet Address", options=accounts)
+usdc_token_address=st.text_input('your USDC token address')
+usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', usdc_token_address)
+
 usdc_amount = int(price*amount*usdc_to_viv)
+
+st.write('USDC token owners, please approve the allowances so we can send your USDC for settlement')
+if st.button("Approve"): 
+    tx_hash = usdc_token_contract.functions.approve(eth_contract_address, usdc_amount*usdc_to_viv).transact({'from':settler_address,'gas': 1000000})
+    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+    st.write(dict(receipt))
+
 if st.button("Settle"):
     tx_hash = eth_contract.functions.settleSwap(settler_address, usdc_token_address, usdc_amount).transact({'value': amount, 'from': initialize_address, 'gas': 1000000})
     receipt = w3.eth.waitForTransactionReceipt(tx_hash)
@@ -98,7 +108,13 @@ initialize_address = st.selectbox("USDC Initializer Wallet Address", options=acc
 st.write(f'Token Address is {usdc_token_address}, and initialize_address is {initialize_address}')
 usdc_amount = int(st.number_input("USDC to be Initialize"))
 price = st.number_input('Minimum Price of ETH in USDC')
-usdc_token_address=st.text_input('your USDC token address')
+usdc_token_address=st.text_input('USDC-ETH: USDC token address')
+usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', usdc_token_address)
+st.write('USDC token owners, please approve the allowances so we can send your USDC for settlement')
+if st.button("Approve for USDC Trade"): 
+    tx_hash = usdc_token_contract.functions.approve(eth_contract_address, usdc_amount*usdc_to_viv).transact({'from':settler_address,'gas': 1000000})
+    receipt = w3.eth.waitForTransactionReceipt(tx_hash)
+    st.write(dict(receipt))
 usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', usdc_token_address)
 
 if st.button("Initialize USDC-ETH Swap"):
