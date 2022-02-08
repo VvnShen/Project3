@@ -47,10 +47,9 @@ load_dotenv()
 w3 = Web3(Web3.HTTPProvider(os.getenv("WEB3_PROVIDER_URI")))
 
 # Set USDC Token Address
-#usdc_token_address = os.getenv("USDC_TOKEN_CONTRACT_ADDRESS")
-usdc_token_address = '0xf15435d605102DaFa34879b484767df1bFea0694'
-eth_contract_address = '0xf868E1873a179723442eCFb42E835C0bE1792b3B'
-usdc_contract_address = '0xFd1beb49aF9156e500bb1E666AB36DBa6c8E00E9'
+usdc_token_address = '0x7be2101967324E87A142D6D2672c3ce1A2ff720C'
+eth_contract_address = '0xA729d1849260Cd0E886414643d83B3E86AB8040F'
+usdc_contract_address = '0xA729d1849260Cd0E886414643d83B3E86AB8040F'
 
 # load both contracts
 eth_contract = load_contract('./Compiled/ETH_Owner_abi.json', eth_contract_address)
@@ -59,7 +58,7 @@ usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', usdc_token
 
 eth_to_wei = 1000000000000000000
 usdc_to_viv = 1000000
-total_USDC_token = 10000000000
+total_USDC_token = 1000000000000000000
 # Approve USDC limits
 #tx_hash = usdc_token_contract.functions.approve('eth_contract_address', 5000000).transact({'gas': 1000000})
 #receipt = w3.eth.waitForTransactionReceipt(tx_hash)
@@ -99,6 +98,9 @@ initialize_address = st.selectbox("USDC Initializer Wallet Address", options=acc
 st.write(f'Token Address is {usdc_token_address}, and initialize_address is {initialize_address}')
 usdc_amount = int(st.number_input("USDC to be Initialize"))
 price = st.number_input('Minimum Price of ETH in USDC')
+usdc_token_address=st.text_input('your USDC token address')
+usdc_token_contract = load_contract('./Compiled/USDC_Token_abi.json', usdc_token_address)
+
 if st.button("Initialize USDC-ETH Swap"):
     tx_hash = usdc_contract.functions.initialize(usdc_amount*usdc_to_viv, usdc_token_address).transact({'from': initialize_address, 'gas': 1000000})
     receipt = w3.eth.waitForTransactionReceipt(tx_hash)
@@ -111,8 +113,10 @@ if price != 0:
     amount = int(eth_to_wei*(usdc_amount/price))   # in wei
 else:
     amount = 0
+
+
 if st.button("Settle USDC"):
-    tx_hash = eth_contract.functions.settleSwap(usdc_amount*usdc_to_viv, settler_address, usdc_token_address).transact({'value': amount, 'from': initialize_address, 'gas': 1000000})
+    tx_hash = usdc_contract.functions.settleSwap(usdc_amount*usdc_to_viv, initialize_address, usdc_token_address).transact({'value': amount, 'from': settler_address, 'gas': 1000000})
     receipt = w3.eth.waitForTransactionReceipt(tx_hash)
     st.write("Transaction receipt mined:")
     st.write(dict(receipt))

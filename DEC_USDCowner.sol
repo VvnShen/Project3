@@ -59,8 +59,6 @@ contract Dex_USDC_owner_trading {
     function settleSwap (uint init_amount, address payable settler_,address _token)
         external       
         inState(State.Locked)
-        //condition(init_amount != 0)  
-        //condition(msg.value !=0)
         payable  condition(init_amount != 0)   {
             emit SettleSwap();
             token = IUsdcToken(_token);
