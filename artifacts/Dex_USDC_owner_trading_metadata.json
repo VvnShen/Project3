@@ -144,19 +144,19 @@
 	},
 	"sources": {
 		"DEC_USDCowner.sol": {
-			"keccak256": "0x109083f5da0b21b365261415feddb9c6955848deaeaa7cf84cd45bdc053f8fa4",
+			"keccak256": "0xb9775d49ed8803edc139f54526f601bc85b1d1d616b6a0ce8f06eb2c1be519ff",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://7dcbc2f0d7bcb5a3b95a2496c97de35725815698eadf94a20e99f87a95567cd0",
-				"dweb:/ipfs/QmWPcqMMA9YUvtdTMe9a58iWxXqgB64hMKgMiSEFvJGfdw"
+				"bzz-raw://94a19f27ee00cb7edd3c8d930d286466d8b7dc4d5723b875d9909da1602984e6",
+				"dweb:/ipfs/Qmbz1nNYbv6JGKmsdpb2GgmNoZuDRoffHigXXWoVi34k7w"
 			]
 		},
 		"USDC_testnet.sol": {
-			"keccak256": "0xf5f74c29b4562ed16522fbcf6fc819f6cb5d42cef18523f89f92067a23d474fb",
+			"keccak256": "0xf20dae0ce751597fc7f8ac1d52411538a82a9bebd420eee6cfdbcbcc2df7810b",
 			"license": "GPL-3.0",
 			"urls": [
-				"bzz-raw://7fb4d40fb7c21eacce537b810201baf28f26e1d48e3d20c965b7dca2721995ab",
-				"dweb:/ipfs/QmcdPhG7m2aHxCBVXJDv9MdSxZwLjXY4miptZndpKPHkZf"
+				"bzz-raw://e2d152f36ee73c31b5243f722495da44f6f931fc9a1731e8b10b465dad50b0c2",
+				"dweb:/ipfs/QmanGe43MDKd8G5gGL4pKVQY95w64VeTM6ac4mX3J3NrjY"
 			]
 		},
 		"github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol": {

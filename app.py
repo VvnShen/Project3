@@ -57,15 +57,15 @@ def transact_offer(selected_offer, settler_address, usdc_token_address):
             
     
     # Call contract to execute transaction functions
-    if trade_type is 'Buy':   # Selected offer is to settle ETH with USDC
+    if trade_type is 'Buy':   # Selected offer is to buy ETH with USDC
         usdc_amount = amount
         eth_amount = int(eth_to_wei*(usdc_amount/price))
         #st.write(f'Initializer Address = {initialize_address}')
         #st.write(f'Settler Address = {settler_address}')
         tx_hash = usdc_contract.functions.settleSwap(usdc_amount*usdc_to_viv, settler_address, usdc_token_address).transact({'value': eth_amount, 'from': settler_address, 'gas': 1000000})
         receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-        st.write("Transaction receipt mined:")
-        st.write(dict(receipt))
+        #st.write("Transaction receipt mined:")
+        #st.write(dict(receipt))
     else:
         
         # load usdc token contract
@@ -75,12 +75,13 @@ def transact_offer(selected_offer, settler_address, usdc_token_address):
         # First approve the amount to be transacted
         tx_hash = usdc_token_contract.functions.approve(eth_contract_address, usdc_amount).transact({'from':settler_address,'gas': 1000000})
         receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-        st.write(dict(receipt))
+        #st.write(dict(receipt))
+
 
         tx_hash = eth_contract.functions.settleSwap(settler_address, usdc_token_address, usdc_amount).transact({'value': eth_amount, 'from': initialize_address, 'gas': 1000000})
         receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-        st.write("Transaction receipt mined:")
-        st.write(dict(receipt))
+        #st.write("Transaction receipt mined:")
+        #st.write(dict(receipt))
 
 
     # Remove transacted offer from the list
@@ -95,20 +96,22 @@ def add_offer(trade_type, exchange_rate, amount, offer_address, usdc_token_addre
         # First approve the transcation from the token contract
         tx_hash = usdc_token_contract.functions.approve(usdc_contract_address, usdc_amount*usdc_to_viv).transact({'from':offer_address,'gas': 1000000})
         receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-        st.write(dict(receipt))
+        st.success(f'During initialization, {usdc_amount}USDC Token is locked from your wallet.')
+        #st.write(dict(receipt))
+
 
         # Initialize the offer
         tx_hash = usdc_contract.functions.initialize(usdc_amount*usdc_to_viv, usdc_token_address).transact({'from': offer_address, 'gas': 1000000})
         receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-        st.write("Transaction receipt mined:")
-        st.write(dict(receipt))
+        #st.write("Transaction receipt mined:")
+        #st.write(dict(receipt))
 
     else:                     # user own ETH and wants to sell
         initialize_amount = amount*eth_to_wei
         tx_hash = eth_contract.functions.initialize().transact({'value': initialize_amount, 'from': offer_address, 'gas': 1000000})
         receipt = w3.eth.waitForTransactionReceipt(tx_hash)
-        st.write("Transaction receipt mined:")
-        st.write(dict(receipt))
+        #st.write("Transaction receipt mined:")
+        #st.write(dict(receipt))
 
     if st.session_state.offers.empty:
         id = 0
@@ -118,6 +121,8 @@ def add_offer(trade_type, exchange_rate, amount, offer_address, usdc_token_addre
     # add the offer to the display list
     st.session_state.offers = st.session_state['offers'].append({'TradeID': id, 'Trade': trade_type, 'Rate': exchange_rate, 'Amount': amount, 'address': offer_address}, ignore_index=True)
 
+    #if trade_type is 'Buy':
+    #     st.session_state.approval_receipt = usdc_amount
 
 # Utility functions
 def display_offers(offers):
@@ -141,8 +146,8 @@ def display_offers(offers):
 # load both contracts
 
 # Set Contract Address
-eth_contract_address = '0x889542459b28e8c341ca13bD702B749cf048AFf8'
-usdc_contract_address = '0xA729d1849260Cd0E886414643d83B3E86AB8040F'
+eth_contract_address = '0xc953Db9D4801E1aC97eD9b395c85F84606Da1019'
+usdc_contract_address = '0xB2A46d57669E44496e9c6c6FDD3eE6c4ad6aFE1c'
 #usdc_token_address = '0x7be2101967324E87A142D6D2672c3ce1A2ff720C'
 
 # load both contracts
@@ -153,13 +158,14 @@ usdc_contract = load_contract('./Compiled/USDC_Owner_abi.json', usdc_contract_ad
 # Some hard facts
 eth_to_wei = 1000000000000000000
 usdc_to_viv = 1000000
-total_USDC_token = 1000000000000000000
+
 
 
 # initialize current offer structure
-if 'offers' not in st.session_state:
+if 'offers' not in st.session_state :
     # Read existing tokens and its offers in both contracts
     st.session_state['offers'] = pd.DataFrame(columns=['TradeID','Trade','Rate','Amount','address'])
+
 
 
 # Get accounts addresses from Ganache
@@ -189,7 +195,7 @@ selected_offer = st.selectbox(
 if st.session_state.offers.empty == False:
     # Ask user for the transaction address
     your_address = st.selectbox("Select Transaction Account", options=accounts)
-    usdc_token_address='0x7be2101967324E87A142D6D2672c3ce1A2ff720C' #st.text_input("Your USDC Token address")
+    usdc_token_address=st.text_input("Settler USDC Token address")
     # A button to make transaction of selected offer
     st.button("Transact", on_click=transact_offer, args=[selected_offer, your_address, usdc_token_address])
 
@@ -201,9 +207,10 @@ st.markdown("### Please make your offer here.")
 trade_type = st.selectbox('Buy or Sell?', ('Buy','Sell'))
 
 offer_address = st.selectbox("Transaction Wallet Address", options=accounts)
-exchange_rate = st.text_input("Your exchange rate in USDC/ETH")
 if trade_type == 'Buy':
-    usdc_token_address = '0x7be2101967324E87A142D6D2672c3ce1A2ff720C' #st.text_input("Your USDC Token address")
+    usdc_token_address = st.text_input("Initializer USDC Token address")
+exchange_rate = st.text_input("Your limit price in USDC/ETH")
+if trade_type == 'Buy':
     amount = int(st.number_input("Amount to be exchanged (USDC)"))
     st.button("Make Offer", on_click=add_offer, args=[trade_type, exchange_rate, amount, offer_address, usdc_token_address])
 else:
