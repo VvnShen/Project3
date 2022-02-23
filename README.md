@@ -1,7 +1,7 @@
 # Project3
 ## Frontend presentation
-clone the whole repository into your local. 
-Open up Ganache. 
+clone the whole repository into your local. ->
+Open up Ganache. ->
 streamlit run app.py
 <img width="1383" alt="image" src="https://user-images.githubusercontent.com/88476898/155257033-410de38a-450b-42fa-9ecf-a3eaa4753b3e.png">
 
