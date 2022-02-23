@@ -1,4 +1,8 @@
 # Project3
+## Frontend presentation
+<img width="1383" alt="image" src="https://user-images.githubusercontent.com/88476898/155257033-410de38a-450b-42fa-9ecf-a3eaa4753b3e.png">
+
+
 ## Backend Functional Presentation
 There are two types of smart contracts designed. One is for the person who initialize the contract (i.e. initializer) is owning ETH and swaping to USDC. The other is for initializers who owns USDC and wanrs to swap to ETH. This guide will present how backend works on the two contracts. 
 Please get ready remix with solidity codes attached in the github, as well as Ganache and Metamask for testing.
