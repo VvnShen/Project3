@@ -3,7 +3,7 @@
 clone the whole repository into your local. ->
 Open up Ganache. ->
 streamlit run app.py
-<img width="1362" alt="image" src="https://user-images.githubusercontent.com/88476898/155374950-8e8ea1fb-e3ee-4b24-92e0-d0e9ad94fddd.png">
+![image](https://user-images.githubusercontent.com/88476898/155432313-85045ef9-2af7-4d6c-91b3-0895eca75c72.png)
 
 
 ## Backend Functional Presentation
