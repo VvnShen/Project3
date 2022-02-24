@@ -1,4 +1,4 @@
-# Project3
+# Crypto Decentralized Exchange platform - Crypto Flea Market
 ## Frontend presentation
 clone the whole repository into your local. ->
 Open up Ganache. ->
